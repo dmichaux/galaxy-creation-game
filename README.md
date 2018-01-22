@@ -9,4 +9,4 @@ This project is an exercise in creating, querying, and manipulating database inf
 - L = Solar Luminosity (1L = luminosity of our Sun)
 
 Built with Python 3.6 and SQLite3
----
+*** 
