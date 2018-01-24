@@ -5,7 +5,8 @@ import time
 
 
 def print_welcome():
-	print("Welcome to Star Game!\nYour nearby stars are being created ...")
+	print("Welcome to Star Game!"
+		"\nYour nearby stars systems are being created ...")
 
 
 def populate_celestials():
@@ -22,6 +23,26 @@ def populate_celestials():
 			percent_created += 5
 			print("{}% created".format(percent_created))
 		db.execute("INSERT INTO stars (age, mass, location) VALUES (?, ?, ?)", (age, mass, location))
+		planets = random.randint(0, 9)
+		if planets > 0:
+			distance = 0
+			for j in range(1, (planets + 1)):
+				composition = None
+				mass = None
+				habitable = "False"
+				if distance < 3.5:
+					distance += round(random.uniform(0.6, 1.2), 2)
+					composition = "rocky"
+					mass = round(random.uniform(0.2, 2), 2)
+					if 0.9 < distance < 1.8:
+						habitable = "True"
+				else:
+					distance += round(random.uniform(8, 11), 2)
+					composition = "gas/ice"
+					mass = round(random.uniform(20, 300), 2)
+				db.execute("INSERT INTO planets (mass, composition, distance,"
+					" habitable, home_star) VALUES(?, ?, ?, ?, ?)", (mass,
+						composition, distance, habitable, location))
 		db.commit()
 
 
@@ -41,9 +62,14 @@ def generate_location(map_size, occupied):
 
 
 def print_stats(perf_time):
-	cursor = db.execute("SELECT MAX(id) FROM stars")
-	star_number, = cursor.fetchone()
-	print("There are {} stars in your area, created in {} seconds.".format(star_number, perf_time))
+	cursor = db.execute("SELECT MAX(stars.id), MAX(planets.id) FROM stars"
+		" INNER JOIN planets ON stars.location = planets.home_star")
+	star_number, planet_number = cursor.fetchone()
+	print("\nThere are {} stars and {} planets in your area; created in {} seconds.".format(star_number, planet_number, perf_time))
+	cursor = db.execute("SELECT COUNT(id) FROM planets"
+		" WHERE habitable = 'True'")
+	habitable_number, = cursor.fetchone()
+	print("Your area includes {} potentially habitable planets!\n".format(habitable_number))
 
 
 if __name__ == "__main__":
@@ -56,12 +82,12 @@ if __name__ == "__main__":
 
 	db = sqlite3.connect('celestials.db')
 	db.execute('CREATE TABLE stars (id INTEGER PRIMARY KEY, age INTEGER, mass INTEGER, location TEXT)')
-	db.execute('CREATE TABLE planets (id INTEGER PRIMARY KEY, mass INTEGER, composition TEXT, distance INTEGER, home_star INTEGER)')
+	db.execute('CREATE TABLE planets (id INTEGER PRIMARY KEY, mass INTEGER, composition TEXT, distance INTEGER, habitable TEXT, home_star TEXT)')
 
 	populate_celestials()
 
 	end = time.perf_counter()
-	elapsed = end - start
+	elapsed = round(end - start, 3)
 
 	print_stats(elapsed)
 
