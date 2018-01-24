@@ -6,7 +6,7 @@ import time
 
 def print_welcome():
 	print("Welcome to Star Game!"
-		"\nYour nearby stars systems are being created ...")
+		"\nYour nearby star systems are being created ...")
 
 
 def populate_celestials():
@@ -23,27 +23,32 @@ def populate_celestials():
 			percent_created += 5
 			print("{}% created".format(percent_created))
 		db.execute("INSERT INTO stars (age, mass, location) VALUES (?, ?, ?)", (age, mass, location))
-		planets = random.randint(0, 9)
-		if planets > 0:
-			distance = 0
-			for j in range(1, (planets + 1)):
-				composition = None
-				mass = None
-				habitable = "False"
-				if distance < 3.5:
-					distance += round(random.uniform(0.6, 1.2), 2)
-					composition = "rocky"
-					mass = round(random.uniform(0.2, 2), 2)
-					if 0.9 < distance < 1.8:
-						habitable = "True"
-				else:
-					distance += round(random.uniform(8, 11), 2)
-					composition = "gas/ice"
-					mass = round(random.uniform(20, 300), 2)
-				db.execute("INSERT INTO planets (mass, composition, distance,"
-					" habitable, home_star) VALUES(?, ?, ?, ?, ?)", (mass,
-						composition, distance, habitable, location))
+		local_planet_num = random.randint(0, 9)
+		if local_planet_num > 0:
+			populate_planets(local_planet_num, location)
 		db.commit()
+
+
+def populate_planets(planet_num, home_star_location):
+	"""Populate database with planets local to a star"""
+	distance = 0
+	for i in range(1, (planet_num + 1)):
+		composition = None
+		mass = None
+		habitable = "False"
+		if distance < 3.5:
+			distance += round(random.uniform(0.6, 1.2), 2)
+			composition = "rocky"
+			mass = round(random.uniform(0.2, 2), 2)
+			if 0.9 < distance < 1.8:
+				habitable = "True"
+		else:
+			distance += round(random.uniform(8, 11), 2)
+			composition = "gas/ice"
+			mass = round(random.uniform(20, 300), 2)
+		db.execute("INSERT INTO planets (mass, composition, distance,"
+			" habitable, home_star) VALUES(?, ?, ?, ?, ?)", (mass,
+				composition, distance, habitable, home_star_location))
 
 
 def generate_location(map_size, occupied):
@@ -69,7 +74,7 @@ def print_stats(perf_time):
 	cursor = db.execute("SELECT COUNT(id) FROM planets"
 		" WHERE habitable = 'True'")
 	habitable_number, = cursor.fetchone()
-	print("Your area includes {} potentially habitable planets!\n".format(habitable_number))
+	print("Your area includes {} planets in the Habitable Zone!\n".format(habitable_number))
 
 
 if __name__ == "__main__":
