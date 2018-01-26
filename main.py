@@ -67,6 +67,7 @@ def generate_location(map_size, occupied):
 
 
 def print_stats(perf_time):
+	"""Print numbers of stars, total planets, habitable planets"""
 	cursor = db.execute("SELECT MAX(stars.id), MAX(planets.id) FROM stars"
 		" INNER JOIN planets ON stars.location = planets.home_star")
 	star_number, planet_number = cursor.fetchone()
@@ -75,6 +76,17 @@ def print_stats(perf_time):
 		" WHERE habitable = 'True'")
 	habitable_number, = cursor.fetchone()
 	print("Your area includes {} planets in the Habitable Zone!\n".format(habitable_number))
+
+
+def find_random_location():
+	"""Select a random star's location"""
+	cursor = db.execute("SELECT MAX(id) FROM stars")
+	star_number, = cursor.fetchone()
+	random_star_id = random.randint(1, star_number)
+	cursor = db.execute("SELECT location FROM stars WHERE id = ?", 
+		(random_star_id,))
+	random_star_location, = cursor.fetchone()
+	return random_star_location
 
 
 if __name__ == "__main__":
@@ -95,5 +107,8 @@ if __name__ == "__main__":
 	elapsed = round(end - start, 3)
 
 	print_stats(elapsed)
+
+	player_location = find_random_location()
+	print("You find yourself in the star system at:", player_location)
 
 	db.close()
