@@ -2,6 +2,7 @@ import sqlite3
 import random
 import os
 import time
+import math
 
 
 def print_welcome():
@@ -89,6 +90,18 @@ def find_random_location():
 	return random_star_location
 
 
+def distance_to(location_1, location_2):
+	"""Calculate distance between two locations"""
+	loc_1_list = location_1.strip('()').split(', ')
+	loc_1_tuple = tuple([int(x) for x in loc_1_list])
+	loc_2_list = location_2.strip('()').split(', ')
+	loc_2_tuple = tuple([int(x) for x in loc_2_list])
+	x1, y1, z1 = loc_1_tuple
+	x2, y2, z2 = loc_2_tuple
+	distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+	return round(distance, 2)
+
+
 if __name__ == "__main__":
 	print_welcome()
 
@@ -109,6 +122,8 @@ if __name__ == "__main__":
 	print_stats(elapsed)
 
 	player_location = find_random_location()
-	print("You find yourself in the star system at:", player_location)
+	distance_to_origin = distance_to(player_location, '(0, 0, 0)')
+	print("You find yourself in the star system at {}.\n"
+		"You are {}ly from the center of your star cluster".format(player_location, distance_to_origin))
 
 	db.close()
