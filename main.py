@@ -101,6 +101,18 @@ def distance_to(location_1, location_2):
 	distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 	return round(distance, 2)
 
+def stars_within(current_location, search_radius=1000):
+	"""Search database for stars within search radius of current location"""
+	print("\nConducting omni-directional scan...")
+	within_range = []
+	cursor = db.execute("SELECT location FROM stars")
+	stars = cursor.fetchall()
+	for location, in stars:
+		if distance_to(current_location, location) <= search_radius:
+			within_range.append(location)
+	print("\nThe scan of {}ly radius found {} stars.\nLocations: {}".format(search_radius, len(within_range), within_range))
+	return (len(within_range), within_range)
+
 
 if __name__ == "__main__":
 	print_welcome()
@@ -124,6 +136,8 @@ if __name__ == "__main__":
 	player_location = find_random_location()
 	distance_to_origin = distance_to(player_location, '(0, 0, 0)')
 	print("You find yourself in the star system at {}.\n"
-		"You are {}ly from the center of your star cluster".format(player_location, distance_to_origin))
+		"You are {}ly from the center of your star cluster.".format(player_location, distance_to_origin))
+
+	stars_within(str(player_location))
 
 	db.close()
