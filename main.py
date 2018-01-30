@@ -23,7 +23,7 @@ def populate_celestials():
 		if i % (star_count // 20) == 0:
 			percent_created += 5
 			print("{}% created".format(percent_created))
-		db.execute("INSERT INTO stars (age, mass, location, nebula) VALUES (?, ?, ?, ?)", (age, mass, location, 'True'))
+		db.execute("INSERT INTO stars (age, mass, location, nebula) VALUES (?, ?, ?, ?)", (age, mass, location, 'False'))
 		local_planet_num = random.randint(0, 9)
 		if local_planet_num > 0:
 			populate_planets(local_planet_num, location)
@@ -104,17 +104,27 @@ def distance_to(location_1, location_2):
 def stars_within(current_location, search_radius=1000):
 	"""Search database for stars within search radius of current location"""
 	print("\nConducting omni-directional scan...")
-	within_range = []
-	cursor = db.execute("SELECT location FROM stars")
+	stars_within_range = []
+	nebulas_within_range = []
 
 	# Could a generator be used to save memory?
 
+	cursor = db.execute("SELECT location FROM stars "
+						"WHERE nebula = 'False'")
 	stars = cursor.fetchall()
 	for location, in stars:
 		if distance_to(current_location, location) <= search_radius:
-			within_range.append(location)
-	print("\nThe scan of {}ly radius found {} stars.\nLocations: {}".format(search_radius, len(within_range), within_range))
-	return (len(within_range), within_range)
+			stars_within_range.append(location)
+	print("\nThe scan of {}ly radius found {} stars.\nLocations: {}".format(search_radius, len(stars_within_range), stars_within_range))
+
+	cursor = db.execute("SELECT location FROM stars "
+						"WHERE nebula = 'True'")
+	nebulas = cursor.fetchall()
+	for location, in nebulas:
+		if distance_to(current_location, location) <= search_radius:
+			nebulas_within_range.append(location)
+	print("\nScan found {} nebulas.\nLocations: {}".format(len(nebulas_within_range), nebulas_within_range))
+	# return (len(within_range), within_range)
 
 def explode_star(coordinates):
 	db.execute("UPDATE stars "
@@ -155,8 +165,9 @@ if __name__ == "__main__":
 
 	stars_within(str(player_location))
 
-	exploding = input("\nExploding which star? [coordinates]")
+	exploding = input("\nExploding which star? [coordinates]\n")
 	explode_star(exploding)
 
+	stars_within(str(player_location))
 
 	db.close()
