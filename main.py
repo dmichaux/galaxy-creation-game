@@ -1,3 +1,8 @@
+# TODO add tests for user input to match parameters
+# TODO fix search to not include current location
+# TODO make location the PRIMARY KEY for stars table
+# TODO change all stars.id queries to stars.location
+
 import sqlite3
 import random
 import os
@@ -81,11 +86,8 @@ def print_stats(perf_time):
 
 def find_random_location():
 	"""Select a random star's location."""
-	cursor = db.execute("SELECT MAX(id) FROM stars")
-	star_number, = cursor.fetchone()
-	random_star_id = random.randint(1, star_number)
-	cursor = db.execute("SELECT location FROM stars WHERE id = ?", 
-		(random_star_id,))
+	cursor = db.execute("SELECT location FROM stars "
+						"ORDER BY RANDOM() LIMIT 1")
 	random_star_location, = cursor.fetchone()
 	return random_star_location
 
