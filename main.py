@@ -11,7 +11,7 @@ def print_welcome():
 
 
 def populate_celestials():
-	"""Populate database with a unique number of stars and planets"""
+	"""Populate database with a unique number of stars and planets."""
 	star_count = random.randint(2500, 4000)
 	map_size = 4000
 	star_locations = []
@@ -31,7 +31,7 @@ def populate_celestials():
 
 
 def populate_planets(planet_num, home_star_location):
-	"""Populate database with planets local to a star"""
+	"""Populate database with planets local to a star."""
 	distance = 0
 	for i in range(1, (planet_num + 1)):
 		composition = None
@@ -53,7 +53,7 @@ def populate_planets(planet_num, home_star_location):
 
 
 def generate_location(map_size, occupied):
-	"""Generate a unique 3D location that is not already occupied"""
+	"""Generate a unique 3D location that is not already occupied."""
 	locations = occupied[:]
 	coordinates = None
 	while True:
@@ -68,7 +68,7 @@ def generate_location(map_size, occupied):
 
 
 def print_stats(perf_time):
-	"""Print numbers of stars, total planets, habitable planets"""
+	"""Print numbers of stars, total planets, habitable planets."""
 	cursor = db.execute("SELECT MAX(stars.id), MAX(planets.id) FROM stars"
 		" INNER JOIN planets ON stars.location = planets.home_star")
 	star_number, planet_number = cursor.fetchone()
@@ -80,7 +80,7 @@ def print_stats(perf_time):
 
 
 def find_random_location():
-	"""Select a random star's location"""
+	"""Select a random star's location."""
 	cursor = db.execute("SELECT MAX(id) FROM stars")
 	star_number, = cursor.fetchone()
 	random_star_id = random.randint(1, star_number)
@@ -91,7 +91,7 @@ def find_random_location():
 
 
 def distance_to(location_1, location_2):
-	"""Calculate distance between two locations"""
+	"""Calculate distance between two locations."""
 	loc_1_list = location_1.strip('()').split(', ')
 	loc_1_tuple = tuple([int(x) for x in loc_1_list])
 	loc_2_list = location_2.strip('()').split(', ')
@@ -102,12 +102,12 @@ def distance_to(location_1, location_2):
 	return round(distance, 2)
 
 def stars_within(current_location, search_radius=1000):
-	"""Search database for stars within search radius of current location"""
+	"""Search database for stars within search radius of current location."""
 	print("\nConducting omni-directional scan...")
 	stars_within_range = []
 	nebulas_within_range = []
 
-	# Could a generator be used to save memory?
+	# TODO could a generator be used to save memory?
 
 	cursor = db.execute("SELECT location FROM stars "
 						"WHERE nebula = 'False'")
@@ -126,17 +126,31 @@ def stars_within(current_location, search_radius=1000):
 	print("\nScan found {} nebulas.\nLocations: {}".format(len(nebulas_within_range), nebulas_within_range))
 	# return (len(within_range), within_range)
 
+
 def explode_star(coordinates):
+	"""Update database to set star values to zero. Delete star's planets."""
 	db.execute("UPDATE stars "
 				"SET age = 0, "
 					"mass = 0, "
 					"nebula = 'True' "
 				"WHERE location = ?", (coordinates,))
-	print("\nStar exploded. Printing new stats:")
-	cursor = db.execute("SELECT * FROM stars "
-						"WHERE location = ?", (coordinates,))
-	new_stats = cursor.fetchone()
-	print(new_stats)
+	db.execute("DELETE FROM planets WHERE home_star = ?", (coordinates,))
+	print("\nStar exploded (orbiting planets too).")
+	db.commit()
+
+
+def recreate_star(coordinates):
+	"""Update database with new star mass and planets."""
+	mass = round(random.uniform(0.5, 80), 2)
+	db.execute("UPDATE stars "
+				"SET mass = ?, "
+					"nebula = 'False' "
+				"WHERE location = ?", (mass, coordinates))
+	local_planet_num = random.randint(0, 9)
+	if local_planet_num > 0:
+		populate_planets(local_planet_num, coordinates)
+	print("Star created. It has {} planets.".format(local_planet_num))
+	db.commit()
 
 
 if __name__ == "__main__":
@@ -167,6 +181,11 @@ if __name__ == "__main__":
 
 	exploding = input("\nExploding which star? [coordinates]\n")
 	explode_star(exploding)
+
+	stars_within(str(player_location))
+
+	creating = input("\nCreate from which nebula? [coordinates]\n")
+	recreate_star(creating)
 
 	stars_within(str(player_location))
 
