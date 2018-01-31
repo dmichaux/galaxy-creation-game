@@ -1,7 +1,7 @@
 # TODO add tests for user input to match parameters
-# TODO fix search to not include current location
 # TODO make location the PRIMARY KEY for stars table
 # TODO change all stars.id queries to stars.location
+# TODO make sure user cannot create star without a nebula present
 
 import sqlite3
 import random
@@ -117,6 +117,8 @@ def stars_within(current_location, search_radius=1000):
 	for location, in stars:
 		if distance_to(current_location, location) <= search_radius:
 			stars_within_range.append(location)
+	if current_location in stars_within_range:
+		stars_within_range.remove(current_location)
 	print("\nThe scan of {}ly radius found {} stars.\nLocations: {}".format(search_radius, len(stars_within_range), stars_within_range))
 
 	cursor = db.execute("SELECT location FROM stars "
@@ -125,6 +127,8 @@ def stars_within(current_location, search_radius=1000):
 	for location, in nebulas:
 		if distance_to(current_location, location) <= search_radius:
 			nebulas_within_range.append(location)
+	if current_location in nebulas_within_range:
+		nebulas_within_range.remove(current_location)
 	print("\nScan found {} nebulas.\nLocations: {}".format(len(nebulas_within_range), nebulas_within_range))
 	# return (len(within_range), within_range)
 
