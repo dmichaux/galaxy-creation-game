@@ -1,11 +1,12 @@
 # TODO add tests for user input to match parameters
 # TODO make location the PRIMARY KEY for stars table
-# TODO change all stars.id queries to stars.location
-# TODO change MAX(stars.id) to COUNT(stars.location)
+# TODO **IF ABOVE** change all stars.id queries to stars.location
+# TODO **IF ABOVE** change MAX(stars.id) to COUNT(stars.location)
 # TODO make sure user cannot create star without a nebula present
 # TODO remove perf_counters
 # TODO use generator in stars_within to save memory?
-# TODO if p1 location == search coords: display planet details w/ sys_stats
+# TODO change habitable 'True/False' to 'Yes/No'?
+# TODO **IF ABOVE** remove "if eval(habitable):" in sys_stats
 
 import sqlite3
 import random
@@ -47,18 +48,18 @@ def populate_planets(planet_num, home_star_location):
 		mass = None
 		habitable = "False"
 		if distance < 3.5:
-			distance += round(random.uniform(0.6, 1.2), 2)
+			distance += random.uniform(0.6, 1.2)
 			composition = "rocky"
 			mass = round(random.uniform(0.2, 2), 2)
 			if 0.9 < distance < 1.8:
 				habitable = "True"
 		else:
-			distance += round(random.uniform(8, 11), 2)
+			distance += random.uniform(8, 11)
 			composition = "gas/ice"
 			mass = round(random.uniform(20, 300), 2)
 		db.execute("INSERT INTO planets (mass, composition, distance,"
 			" habitable, home_star) VALUES(?, ?, ?, ?, ?)", (mass,
-				composition, distance, habitable, home_star_location))
+			composition, round(distance, 2), habitable, home_star_location))
 
 
 def generate_location(map_size, occupied):
@@ -161,7 +162,7 @@ def recreate_star(coordinates):
 	db.commit()
 
 
-def print_system_stats(coordinates):
+def print_system_stats(coordinates, player_location):
 	"""Find and print information on a star and its planets."""
 	cursor = db.execute("SELECT age, mass FROM stars "
 						"WHERE location = ?", (coordinates,))
@@ -171,8 +172,28 @@ def print_system_stats(coordinates):
 	planet_num, = cursor.fetchone()
 	print("\nSelected system details:"
 			"\nStar Age: {} billion years"
-			"\nStar Mass: {} Solar Mass"
+			"\nStar Mass: {} Solar Masses"
 			"\nOrbiting Planets: {}".format(star_age, star_mass, planet_num))
+	# If user searches current location, print more detailed planetary info
+	if coordinates == player_location:
+		cursor = db.execute("SELECT mass, composition, distance, habitable "
+							"FROM planets WHERE home_star = ? "
+							"ORDER BY distance", (coordinates,))
+		planets_info = cursor.fetchall()
+		if len(planets_info) > 0:
+			print("\nPlanetary details for system:"
+				"\nDistance From Star | Mass | Composition | "
+				"Inside Habitable Zone")
+			planet_count = 0
+			for planet in planets_info:
+				mass, composition, distance, habitable = planet
+				if eval(habitable):
+					habitable = 'Yes'
+				else:
+					habitable = 'No'
+				planet_count += 1
+				print("{}: {}au | {} Earth Masses | {} | {}".format(planet_count, distance, mass, composition, habitable))
+
 
 
 if __name__ == "__main__":
@@ -199,7 +220,7 @@ if __name__ == "__main__":
 	print("You find yourself in the star system at {}.\n"
 		"You are {}ly from the center of your star cluster.".format(player_location, distance_to_origin))
 
-	stars_within(str(player_location))
+	# stars_within(str(player_location))
 
 	# exploding = input("\nExploding which star? [coordinates]\n")
 	# explode_star(exploding)
@@ -212,6 +233,6 @@ if __name__ == "__main__":
 	# stars_within(str(player_location))
 
 	system_in_question = input("\nDetails for which star system?")
-	print_system_stats(system_in_question)
+	print_system_stats(system_in_question, player_location)
 
 	db.close()
