@@ -1,7 +1,11 @@
 # TODO add tests for user input to match parameters
 # TODO make location the PRIMARY KEY for stars table
 # TODO change all stars.id queries to stars.location
+# TODO change MAX(stars.id) to COUNT(stars.location)
 # TODO make sure user cannot create star without a nebula present
+# TODO remove perf_counters
+# TODO use generator in stars_within to save memory?
+# TODO if p1 location == search coords: display planet details w/ sys_stats
 
 import sqlite3
 import random
@@ -109,8 +113,6 @@ def stars_within(current_location, search_radius=1000):
 	stars_within_range = []
 	nebulas_within_range = []
 
-	# TODO could a generator be used to save memory?
-
 	cursor = db.execute("SELECT location FROM stars "
 						"WHERE nebula = 'False'")
 	stars = cursor.fetchall()
@@ -159,6 +161,20 @@ def recreate_star(coordinates):
 	db.commit()
 
 
+def print_system_stats(coordinates):
+	"""Find and print information on a star and its planets."""
+	cursor = db.execute("SELECT age, mass FROM stars "
+						"WHERE location = ?", (coordinates,))
+	star_age, star_mass = cursor.fetchone()
+	cursor = db.execute("SELECT COUNT(id) FROM planets "
+						"WHERE home_star = ?", (coordinates,))
+	planet_num, = cursor.fetchone()
+	print("\nSelected system details:"
+			"\nStar Age: {} billion years"
+			"\nStar Mass: {} Solar Mass"
+			"\nOrbiting Planets: {}".format(star_age, star_mass, planet_num))
+
+
 if __name__ == "__main__":
 	print_welcome()
 
@@ -185,14 +201,17 @@ if __name__ == "__main__":
 
 	stars_within(str(player_location))
 
-	exploding = input("\nExploding which star? [coordinates]\n")
-	explode_star(exploding)
+	# exploding = input("\nExploding which star? [coordinates]\n")
+	# explode_star(exploding)
 
-	stars_within(str(player_location))
+	# stars_within(str(player_location))
 
-	creating = input("\nCreate from which nebula? [coordinates]\n")
-	recreate_star(creating)
+	# creating = input("\nCreate from which nebula? [coordinates]\n")
+	# recreate_star(creating)
 
-	stars_within(str(player_location))
+	# stars_within(str(player_location))
+
+	system_in_question = input("\nDetails for which star system?")
+	print_system_stats(system_in_question)
 
 	db.close()
