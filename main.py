@@ -36,6 +36,18 @@ def _initialize_cluster():
 	return star_cluster
 
 
+def main_operations_menu():
+	action = input("\nSelect an action:\n"
+					"\t1. Omni-Directional Scan: search the area for stars and nebulae\n"
+					"\t2. Focal Scan: search a star system for details\n"
+						"\t\t [planetary details are available if scanning current system]\n"
+					"\t3. Fire Weapons: obliterate a star system\n"
+					"\t4. Utilize God-Like Powers: create a star system from a nebula\n"
+					"\t5. Warp: move to another star system\n"
+					"\t6. Exit game\n")
+	return action
+
+
 if __name__ == "__main__":
 
 	star_cluster = game_start_menu()
@@ -46,17 +58,24 @@ if __name__ == "__main__":
 	print("You find yourself in the star system at {}.\n"
 		"You are {}ly from the center of your star cluster.".format(player_location, distance_to_origin))
 
-	star_cluster.local_scan(player_location)
+	# main game loop
+	while True:
+		action = main_operations_menu()
+		if action == "1":
+			star_cluster.local_scan(player_location)
+		elif action == "2":
+			coordinates = input("\nProvide coordinates for Focal Scan:\n")
+			star_cluster.print_system_stats(coordinates, player_location)
+		elif action == "3":
+			coordinates = input("\nProvide coordinates to attack:\n")
+			star_cluster.explode_star(coordinates)
+		elif action == "4":
+			coordinates = input("\nProvide coordinates of a nebula:\n")
+			star_cluster.recreate_star(coordinates)
+		elif action == "5":
+			coordinates = input("\nProvide coordinates for warp drive:\n")
+			player_location = coordinates
+		else:
+			break
 
-	# exploding = input("\nExploding which star? [coordinates]\n")
-	# star_cluster.explode_star(exploding)
-
-	# star_cluster.local_scan(player_location)
-
-	# creating = input("\nCreate from which nebula? [coordinates]\n")
-	# star_cluster.recreate_star(creating)
-
-	# star_cluster.local_scan(player_location)
-
-	# system_in_question = input("\nDetails for which star system?")
-	# star_cluster.print_system_stats(system_in_question, player_location)
+	print("Thank you - come again!")
