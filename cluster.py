@@ -3,10 +3,10 @@ import random
 import math
 
 class Cluster():
-	"""docstring for Cluster"""
+	"""Handles behavior for cluster. Encapsulates database queries and manipulations"""
 
 	def __init__(self):
-		"""Open database connection"""
+		"""Open database connection. Create database tables."""
 		self.db_conn = sqlite3.connect('celestials.db')
 		self.db_conn.execute("CREATE TABLE stars "
 			"(id INTEGER PRIMARY KEY, age INTEGER, mass INTEGER, location TEXT, nebula TEXT)")
@@ -16,7 +16,7 @@ class Cluster():
 
 
 	def __del__(self):
-		"""Confirm closure of database connection"""
+		"""Confirm closure of database connection."""
 		self.db_conn.close()
 		print("\n**Closing database connection**")
 
