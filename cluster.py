@@ -2,6 +2,7 @@ import sqlite3
 import random
 import math
 
+
 class Cluster():
 	"""Handles behavior for cluster. Encapsulates database queries and manipulations"""
 
@@ -109,7 +110,9 @@ class Cluster():
 		return round(distance, 2)
 
 	def local_scan(self, current_location, search_radius=1000):
-		"""Search database for stars within search radius of current location."""
+		"""Query database for stars and nebulas within search radius of current location."""
+		# In larger query results fetchone() in a loop would save memory. 
+		# Here, fetchall() profiles as faster while still using minimal memory.
 		print("\nConducting omni-directional scan...")
 		# Scan for nearby stars
 		stars_within_range = []

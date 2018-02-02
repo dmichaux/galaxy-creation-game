@@ -46,5 +46,5 @@ if __name__ == "__main__":
 
 	# star_cluster.local_scan(player_location)
 
-	system_in_question = input("\nDetails for which star system?")
-	star_cluster.print_system_stats(system_in_question, player_location)
+	# system_in_question = input("\nDetails for which star system?")
+	# star_cluster.print_system_stats(system_in_question, player_location)
