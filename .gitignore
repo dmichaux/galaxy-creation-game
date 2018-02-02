@@ -1,2 +1,3 @@
+__pycache__
 # ignore any previously created databases
 celestials.db
