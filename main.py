@@ -9,8 +9,6 @@
 # TODO make sure user cannot create star without a nebula present
 # TODO remove perf_counters?
 
-import sqlite3
-import random
 import os
 import time
 import cluster
