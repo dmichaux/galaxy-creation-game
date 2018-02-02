@@ -9,9 +9,9 @@ class Cluster():
 	def __init__(self):
 		"""Open database connection. Create database tables."""
 		self.db_conn = sqlite3.connect('celestials.db')
-		self.db_conn.execute("CREATE TABLE stars "
+		self.db_conn.execute("CREATE TABLE IF NOT EXISTS stars "
 			"(id INTEGER PRIMARY KEY, age INTEGER, mass INTEGER, location TEXT, nebula TEXT)")
-		self.db_conn.execute("CREATE TABLE planets "
+		self.db_conn.execute("CREATE TABLE IF NOT EXISTS planets "
 			"(id INTEGER PRIMARY KEY, mass INTEGER, composition TEXT, "
 			"distance INTEGER, habitable TEXT, home_star TEXT)")
 
@@ -80,15 +80,15 @@ class Cluster():
 		return (str(coordinates), locations)
 
 
-	def print_cluster_stats(self, perf_time):
+	def print_cluster_stats(self):
 		"""Print numbers of stars, total planets, habitable planets."""
 		cursor = self.db_conn.execute("SELECT MAX(stars.id), MAX(planets.id) FROM stars "
 									"INNER JOIN planets ON stars.location = planets.home_star")
-		star_number, planet_number = cursor.fetchone()
-		print("\nThere are {} stars and {} planets in your area; created in {} seconds.".format(star_number, planet_number, perf_time))
+		star_num, planet_num = cursor.fetchone()
+		print("\nThere are {} stars and {} planets in your area.".format(star_num, planet_num))
 		cursor = self.db_conn.execute("SELECT COUNT(id) FROM planets WHERE habitable = 'True'")
-		habitable_number, = cursor.fetchone()
-		print("Your area includes {} planets in the Habitable Zone!\n".format(habitable_number))
+		habitable_num, = cursor.fetchone()
+		print("Your area includes {} planets in the Habitable Zone!\n".format(habitable_num))
 
 
 	def find_random_location(self):

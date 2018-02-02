@@ -3,31 +3,43 @@
 # TODO **IF ABOVE** change MAX(stars.id) to COUNT(stars.location)
 # TODO change habitable 'True/False' to 'Yes/No' in planets table?
 # TODO **IF ABOVE** remove "if eval(habitable):" in system_stats
-# TODO use generator (or .fetchone() in loop) in stars_within to save memory?
+
 # TODO explore "with" statement for db/cursor management
 # TODO add tests for user input to match parameters
 # TODO make sure user cannot create star without a nebula present
-# TODO remove perf_counters?
 
 import os
-import time
 import cluster
+
+
+def game_start_menu():
+	"""Begin navigation for game startup"""
+	print("Welcome to Star Game!")
+	if os.path.isfile("celestials.db"):
+		load_or_new = input("\nA previously created cluster exists. Please select 1 or 2."
+							"\n1. Continue with previous cluster\n2. Create new cluster\n")
+		if load_or_new == "1":
+			star_cluster = cluster.Cluster()
+		else:
+			os.remove('celestials.db')
+			star_cluster = _initialize_cluster()
+	else:
+		star_cluster = _initialize_cluster()
+	return star_cluster
+
+
+def _initialize_cluster():
+	"""Create Cluster object. Populate database."""
+	star_cluster = cluster.Cluster()
+	print("\nYour star cluster is being created ...")
+	star_cluster.populate_celestials()
+	return star_cluster
 
 
 if __name__ == "__main__":
 
-	print("Welcome to Star Game!"
-		"\nYour nearby star systems are being created ...")
-
-	start = time.perf_counter()
-	if os.path.isfile('celestials.db'):
-		os.remove('celestials.db')
-
-	star_cluster = cluster.Cluster()
-	star_cluster.populate_celestials()
-	end = time.perf_counter()
-	elapsed = round(end - start, 3)
-	star_cluster.print_cluster_stats(elapsed)
+	star_cluster = game_start_menu()
+	star_cluster.print_cluster_stats()
 
 	player_location = star_cluster.find_random_location()
 	distance_to_origin = star_cluster.distance_to(player_location, '(0, 0, 0)')
