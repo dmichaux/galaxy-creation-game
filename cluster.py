@@ -6,9 +6,9 @@ import math
 class Cluster():
 	"""Handles behavior for cluster. Encapsulates database queries and manipulations"""
 
-	def __init__(self):
+	def __init__(self, filename):
 		"""Open database connection. Create database tables."""
-		self.db_conn = sqlite3.connect('celestials.db')
+		self.db_conn = sqlite3.connect("save_files/" + filename + ".db")
 		self.db_conn.execute("CREATE TABLE IF NOT EXISTS stars "
 			"(id INTEGER PRIMARY KEY, age INTEGER, mass INTEGER, location TEXT, nebula TEXT)")
 		self.db_conn.execute("CREATE TABLE IF NOT EXISTS planets "

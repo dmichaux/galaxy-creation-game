@@ -1,12 +1,14 @@
 # TODO make location the PRIMARY KEY for stars table?
 # TODO **IF ABOVE** change all stars.id queries to stars.location
 # TODO **IF ABOVE** change MAX(stars.id) to COUNT(stars.location)
+
 # TODO change habitable 'True/False' to 'Yes/No' in planets table?
 # TODO **IF ABOVE** remove "if eval(habitable):" in system_stats
 
 # TODO explore "with" statement for db/cursor management
 # TODO add tests for user input to match parameters
 # TODO make sure user cannot create star without a nebula present
+# TODO add sleep() time for better flow
 
 import os
 import cluster
@@ -15,22 +17,46 @@ import cluster
 def game_start_menu():
 	"""Begin navigation for game startup"""
 	print("Welcome to Star Game!")
-	if os.path.isfile("celestials.db"):
-		load_or_new = input("\nA previously created cluster exists. Please select 1 or 2."
-							"\n1. Continue with previous cluster\n2. Create new cluster\n")
-		if load_or_new == "1":
-			star_cluster = cluster.Cluster()
-		else:
-			os.remove('celestials.db')
-			star_cluster = _initialize_cluster()
-	else:
-		star_cluster = _initialize_cluster()
+	if os.path.isdir("save_files") and os.listdir("save_files"): # if saved files exist
+		files = os.listdir('save_files')
+		new_or_load = input("\n1. Create a new cluster\n2. Warp back to a previous cluster\n")
+		if new_or_load == "1": # new game
+			filename = input("What would you like to name your new cluster?\n")
+			already_exists = _test_filename(filename, files)
+			while already_exists: # must choose a unique name
+				filename = input("Name already in use. Choose again:\n")
+				already_exists = _test_filename(filename, files)
+			star_cluster = _initialize_cluster(filename)
+		else: # load game
+			print("Choose a cluster to warp to:")
+			for file in files:
+				if file.endswith(".txt"):
+					print(file.strip(".tx"))
+			filename = input()
+			valid = _test_filename(filename, files)
+			while not valid: # must choose a valid save file
+				filename = input("That cluster does not exist. Choose again:\n")
+				valid = _test_filename(filename, files)
+			star_cluster = cluster.Cluster(filename)
+	else: # No previous games exits. Start new game.
+		if not os.path.isdir("save_files"):
+			os.mkdir("save_files")
+		filename = input("What would you like to name your new cluster?\n")
+		star_cluster = _initialize_cluster(filename)
 	return star_cluster
 
 
-def _initialize_cluster():
+def _test_filename(filename, files):
+	exists = False
+	for file in files:
+		if filename in file:
+			exists = True
+	return exists
+
+
+def _initialize_cluster(filename):
 	"""Create Cluster object. Populate database."""
-	star_cluster = cluster.Cluster()
+	star_cluster = cluster.Cluster(filename)
 	print("\nYour star cluster is being created ...")
 	star_cluster.populate_celestials()
 	return star_cluster
@@ -78,4 +104,4 @@ if __name__ == "__main__":
 		else:
 			break
 
-	print("Thank you - come again!")
+	print("\nThank you - come again!")
