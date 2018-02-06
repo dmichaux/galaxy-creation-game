@@ -23,6 +23,8 @@ def game_start_menu():
 	if os.path.isdir("save_files") and os.listdir("save_files"): # if saved files exist
 		files = os.listdir('save_files')
 		new_or_load = input("\n1. Create a new cluster\n2. Warp back to a previous cluster\n")
+		while new_or_load not in ["1", "2"]: #user did not enter "1" or "2"
+			new_or_load = input('Invalid selection. Please enter "1" or "2":\n') 
 		if new_or_load == "1": # new game
 			filename = _get_valid_filename(files)
 			star_cluster = _initialize_cluster(filename)
@@ -30,7 +32,7 @@ def game_start_menu():
 			print("Choose a cluster to warp to:")
 			for file in files:
 				if file.endswith(".txt"):
-					print(file.strip(".tx"))
+					print(os.path.splitext(file)[0])
 			filename = input()
 			while not _test_filename_existence(filename, files): # must choose a valid save file
 				filename = input("That cluster does not exist. Choose again:\n")
