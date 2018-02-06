@@ -10,11 +10,9 @@
 # TODO make sure user cannot create star without a nebula present
 # TODO add sleep() time for better flow
 
-# TODO save (JSON to .txt) on exit: player_location, database filename
-# TODO modify load to load from .txt only
-
 import os
 import json
+import re
 import cluster
 
 
@@ -26,9 +24,7 @@ def game_start_menu():
 		files = os.listdir('save_files')
 		new_or_load = input("\n1. Create a new cluster\n2. Warp back to a previous cluster\n")
 		if new_or_load == "1": # new game
-			filename = input("What would you like to name your new cluster?\n")
-			while _test_filename_existence(filename, files): # must choose a unique name
-				filename = input("Name already in use. Choose again:\n")
+			filename = _get_valid_filename(files)
 			star_cluster = _initialize_cluster(filename)
 		else: # load game
 			print("Choose a cluster to warp to:")
@@ -46,7 +42,7 @@ def game_start_menu():
 	else: # No previous games exists. Start new game.
 		if not os.path.isdir("save_files"):
 			os.mkdir("save_files")
-		filename = input("What would you like to name your new cluster?\n")
+		filename = _get_valid_filename()
 		star_cluster = _initialize_cluster(filename)
 	return star_cluster, player_location
 
@@ -57,6 +53,28 @@ def _test_filename_existence(filename, files):
 		if filename in file:
 			exists = True
 	return exists
+
+
+def _get_valid_filename(files=None):
+	"""Get filename that is 1 to 10 chars, alphanumeric-only, and not already in use"""
+	filename = input("What would you like to name your new cluster?\n"
+					"[10 characters max, alphanumeric only]\n")
+	while True:
+		valid = False # set to fail break condition
+		exists = True # set to fail break condition
+		if re.match("^[^\W_]{1,10}$", filename): # regex for 1 to 10 alphanumeric-only chars
+			valid = True
+		if files: # previous save files exist. Test filename for duplication
+			exists = _test_filename_existence(filename, files)
+		else: # files=None so no previous save files exist
+			exists = False
+		if not valid:
+			filename = input("Invalid name. Please try another name:\n")
+		if exists:
+			filename = input("Name already in use. Choose again:\n")
+		if valid and not exists: # filename must match regex and must not already exist
+			break
+	return filename
 
 
 def _initialize_cluster(filename):
