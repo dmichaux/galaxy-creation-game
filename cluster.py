@@ -8,6 +8,7 @@ class Cluster():
 
 	def __init__(self, filename):
 		"""Open database connection. Create database tables."""
+		self.filename = filename
 		self.db_conn = sqlite3.connect("save_files/" + filename + ".db")
 		self.db_conn.execute("CREATE TABLE IF NOT EXISTS stars "
 			"(id INTEGER PRIMARY KEY, age INTEGER, mass INTEGER, location TEXT, nebula TEXT)")

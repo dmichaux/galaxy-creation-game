@@ -10,7 +10,11 @@
 # TODO make sure user cannot create star without a nebula present
 # TODO add sleep() time for better flow
 
+# TODO save (JSON to .txt) on exit: player_location, database filename
+# TODO modify load to load from .txt only
+
 import os
+import json
 import cluster
 
 
@@ -38,7 +42,7 @@ def game_start_menu():
 				filename = input("That cluster does not exist. Choose again:\n")
 				valid = _test_filename(filename, files)
 			star_cluster = cluster.Cluster(filename)
-	else: # No previous games exits. Start new game.
+	else: # No previous games exists. Start new game.
 		if not os.path.isdir("save_files"):
 			os.mkdir("save_files")
 		filename = input("What would you like to name your new cluster?\n")
@@ -74,6 +78,14 @@ def main_operations_menu():
 	return action
 
 
+def save_game(player_location, filename):
+	save_data = {"location": player_location}
+	with open("save_files/" + filename + ".txt", "w") as outfile:
+		json.dump(save_data, outfile)
+	print("\nYour cluster and player data has been saved.")
+
+	# Google: "python json" - v3.6.4
+
 if __name__ == "__main__":
 
 	star_cluster = game_start_menu()
@@ -102,6 +114,8 @@ if __name__ == "__main__":
 			coordinates = input("\nProvide coordinates for warp drive:\n")
 			player_location = coordinates
 		else:
+			save_game(player_location, star_cluster.filename)
 			break
+
 
 	print("\nThank you - come again!")
