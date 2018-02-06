@@ -21,6 +21,7 @@ import cluster
 def game_start_menu():
 	"""Begin navigation for game startup"""
 	print("Welcome to Star Game!")
+	player_location = None # changed if loading from file
 	if os.path.isdir("save_files") and os.listdir("save_files"): # if saved files exist
 		files = os.listdir('save_files')
 		new_or_load = input("\n1. Create a new cluster\n2. Warp back to a previous cluster\n")
@@ -41,13 +42,17 @@ def game_start_menu():
 			while not valid: # must choose a valid save file
 				filename = input("That cluster does not exist. Choose again:\n")
 				valid = _test_filename(filename, files)
+			save_data = {}
+			with open("save_files/" + filename + ".txt", "r") as json_file:
+				save_data = json.load(json_file)
+			player_location = save_data["location"]
 			star_cluster = cluster.Cluster(filename)
 	else: # No previous games exists. Start new game.
 		if not os.path.isdir("save_files"):
 			os.mkdir("save_files")
 		filename = input("What would you like to name your new cluster?\n")
 		star_cluster = _initialize_cluster(filename)
-	return star_cluster
+	return star_cluster, player_location
 
 
 def _test_filename(filename, files):
@@ -67,7 +72,7 @@ def _initialize_cluster(filename):
 
 
 def main_operations_menu():
-	action = input("\nSelect an action:\n"
+	action = input("Select an action:\n"
 					"\t1. Omni-Directional Scan: search the area for stars and nebulae\n"
 					"\t2. Focal Scan: search a star system for details\n"
 						"\t\t [planetary details are available if scanning current system]\n"
@@ -79,25 +84,27 @@ def main_operations_menu():
 
 
 def save_game(player_location, filename):
+	"""Serialize and save game data to file"""
 	save_data = {"location": player_location}
 	with open("save_files/" + filename + ".txt", "w") as outfile:
 		json.dump(save_data, outfile)
 	print("\nYour cluster and player data has been saved.")
 
-	# Google: "python json" - v3.6.4
 
 if __name__ == "__main__":
 
-	star_cluster = game_start_menu()
+	star_cluster, player_location = game_start_menu()
 	star_cluster.print_cluster_stats()
 
-	player_location = star_cluster.find_random_location()
+	if not player_location:
+		player_location = star_cluster.find_random_location()
 	distance_to_origin = star_cluster.distance_to(player_location, '(0, 0, 0)')
 	print("You find yourself in the star system at {}.\n"
 		"You are {}ly from the center of your star cluster.".format(player_location, distance_to_origin))
 
 	# main game loop
 	while True:
+		print("Current System:", player_location)
 		action = main_operations_menu()
 		if action == "1":
 			star_cluster.local_scan(player_location)
