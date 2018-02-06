@@ -27,10 +27,8 @@ def game_start_menu():
 		new_or_load = input("\n1. Create a new cluster\n2. Warp back to a previous cluster\n")
 		if new_or_load == "1": # new game
 			filename = input("What would you like to name your new cluster?\n")
-			already_exists = _test_filename(filename, files)
-			while already_exists: # must choose a unique name
+			while _test_filename_existence(filename, files): # must choose a unique name
 				filename = input("Name already in use. Choose again:\n")
-				already_exists = _test_filename(filename, files)
 			star_cluster = _initialize_cluster(filename)
 		else: # load game
 			print("Choose a cluster to warp to:")
@@ -38,10 +36,8 @@ def game_start_menu():
 				if file.endswith(".txt"):
 					print(file.strip(".tx"))
 			filename = input()
-			valid = _test_filename(filename, files)
-			while not valid: # must choose a valid save file
+			while not _test_filename_existence(filename, files): # must choose a valid save file
 				filename = input("That cluster does not exist. Choose again:\n")
-				valid = _test_filename(filename, files)
 			save_data = {}
 			with open("save_files/" + filename + ".txt", "r") as json_file:
 				save_data = json.load(json_file)
@@ -55,7 +51,7 @@ def game_start_menu():
 	return star_cluster, player_location
 
 
-def _test_filename(filename, files):
+def _test_filename_existence(filename, files):
 	exists = False
 	for file in files:
 		if filename in file:
