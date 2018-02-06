@@ -52,7 +52,7 @@ def game_start_menu():
 def _test_filename_existence(filename, files):
 	exists = False
 	for file in files:
-		if filename in file:
+		if (filename + ".txt") == file:
 			exists = True
 	return exists
 
