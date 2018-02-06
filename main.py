@@ -13,6 +13,8 @@
 import os
 import json
 import re
+import signal
+import sys
 import cluster
 
 
@@ -109,6 +111,19 @@ def save_game(player_location, filename):
 
 if __name__ == "__main__":
 
+	# ==== Handles Exiting By Ctrl-C ====
+	def exit_gracefully(signal, frame):
+		"""Attempt to save game data before exit, if user presses Ctrl-C"""
+		try: # exiting with game data
+			save_game(player_location, star_cluster.filename)
+		except NameError: # exiting before game data established
+			pass
+		finally:
+			print("\nExiting program.")
+			sys.exit(0)
+	signal.signal(signal.SIGINT, exit_gracefully)
+
+	# ==== Begin Game ====
 	star_cluster, player_location = game_start_menu()
 	star_cluster.print_cluster_stats()
 
