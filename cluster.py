@@ -83,13 +83,14 @@ class Cluster():
 
 	def print_cluster_stats(self):
 		"""Print numbers of stars, total planets, habitable planets."""
-		cursor = self.db_conn.execute("SELECT MAX(stars.id), MAX(planets.id) FROM stars "
+		cursor1 = self.db_conn.execute("SELECT MAX(stars.id), MAX(planets.id) FROM stars "
 									"INNER JOIN planets ON stars.location = planets.home_star")
-		star_num, planet_num = cursor.fetchone()
-		print("\nThere are {} stars and {} planets in your area.".format(star_num, planet_num))
-		cursor = self.db_conn.execute("SELECT COUNT(id) FROM planets WHERE habitable = 'True'")
-		habitable_num, = cursor.fetchone()
-		print("Your area includes {} planets in the Habitable Zone!\n".format(habitable_num))
+		star_num, planet_num = cursor1.fetchone()
+		cursor2 = self.db_conn.execute("SELECT COUNT(id) FROM planets WHERE habitable = 'True'")
+		habitable_num, = cursor2.fetchone()
+		print("\nCluster Stats:\n"
+			"Stars: {}\n"
+			"Planets: {} [{} in the Habitable Zone]".format(star_num, planet_num, habitable_num))
 
 
 	def find_random_location(self):
