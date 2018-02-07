@@ -32,7 +32,7 @@ class Cluster():
 		for i in range(1, star_count):
 			age = round(random.uniform(3.0, 13.8), 2)
 			mass = round(random.uniform(0.5, 80), 2)
-			location, star_locations = self.generate_location(map_size, star_locations)
+			location, star_locations = self._generate_location(map_size, star_locations)
 			if i % (star_count // 20) == 0:
 				percent_created += 5
 				print("{}% created".format(percent_created))
@@ -66,7 +66,7 @@ class Cluster():
 								"habitable, home_star) VALUES(?, ?, ?, ?, ?)", (mass, composition, round(distance, 2), habitable, home_star_location))
 
 
-	def generate_location(self, map_size, occupied):
+	def _generate_location(self, map_size, occupied):
 		"""Generate a unique 3D location that is not already occupied."""
 		locations = occupied[:]
 		coordinates = None
@@ -114,27 +114,21 @@ class Cluster():
 		"""Query database for stars and nebulas within search radius of current location."""
 		# In larger query results fetchone() in a loop would save memory. 
 		# Here, fetchall() profiles as faster while still using minimal memory.
-		print("\nConducting omni-directional scan...")
-		# Scan for nearby stars
+		# Scan for nearby stars:
 		stars_within_range = []
 		cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'False'")
 		stars = cursor.fetchall()
 		for location, in stars:
 			if self.distance_to(current_location, location) <= search_radius:
 				stars_within_range.append(location)
-		if current_location in stars_within_range:
-			stars_within_range.remove(current_location)
-		print("\nThe scan of {}ly radius found {} stars.\nLocations: {}".format(search_radius, len(stars_within_range), stars_within_range))
-		# Scan for nearby nebulas
+		# Scan for nearby nebulas:
 		nebulas_within_range = []
 		cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'True'")
 		nebulas = cursor.fetchall()
 		for location, in nebulas:
 			if self.distance_to(current_location, location) <= search_radius:
 				nebulas_within_range.append(location)
-		if current_location in nebulas_within_range:
-			nebulas_within_range.remove(current_location)
-		print("\nScan found {} nebulas.\nLocations: {}".format(len(nebulas_within_range), nebulas_within_range))
+		return search_radius, stars_within_range, nebulas_within_range
 
 
 	def explode_star(self, coordinates):

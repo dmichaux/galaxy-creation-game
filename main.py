@@ -98,6 +98,8 @@ def main_operations_menu():
 					"\t4. Utilize God-Like Powers: create a star system from a nebula\n"
 					"\t5. Warp: move to another star system\n"
 					"\t6. Exit game\n")
+	while action not in ["1", "2", "3", "4", "5", "6"]:
+		action = input("Invalid selection. Choose again:\n")
 	return action
 
 
@@ -137,21 +139,26 @@ if __name__ == "__main__":
 	while True:
 		print("Current System:", player_location)
 		action = main_operations_menu()
-		if action == "1":
-			star_cluster.local_scan(player_location)
-		elif action == "2":
+		if action == "1": # area scan
+			print("\nConducting omni-directional scan...")
+			scan = star_cluster.local_scan(player_location)
+			print("The scan of {}ly radius found {} stars and {} nebulas.\n\n"
+				"Star Locations:\n{}".format(scan[0], len(scan[1]), len(scan[2]), scan[1]))
+			if scan[2]:
+				print("\nNebula Locations:\n{}".format(scan[2]))
+		elif action == "2": # Focal scan
 			coordinates = input("\nProvide coordinates for Focal Scan:\n")
 			star_cluster.print_system_stats(coordinates, player_location)
-		elif action == "3":
+		elif action == "3": # explode system
 			coordinates = input("\nProvide coordinates to attack:\n")
 			star_cluster.explode_star(coordinates)
-		elif action == "4":
+		elif action == "4": # recreate star system
 			coordinates = input("\nProvide coordinates of a nebula:\n")
 			star_cluster.recreate_star(coordinates)
-		elif action == "5":
+		elif action == "5": # warp
 			coordinates = input("\nProvide coordinates for warp drive:\n")
 			player_location = coordinates
-		else:
+		else: # exit
 			save_game(player_location, star_cluster.filename)
 			break
 
