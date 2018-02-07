@@ -6,8 +6,6 @@
 # TODO **IF ABOVE** remove "if eval(habitable):" in system_stats
 
 # TODO explore "with" statement for db/cursor management
-# TODO add tests for user input to match parameters
-# TODO make sure user cannot create star without a nebula present
 # TODO add sleep() time for better flow
 
 import os
@@ -30,6 +28,7 @@ def game_start_menu():
 		if new_or_load == "1": # new game
 			filename = _get_valid_filename(files)
 			star_cluster = _initialize_cluster(filename)
+			player_location = star_cluster.find_random_location()
 		else: # load game
 			print("Choose a cluster to warp to:")
 			for file in files:
@@ -48,6 +47,7 @@ def game_start_menu():
 			os.mkdir("save_files")
 		filename = _get_valid_filename()
 		star_cluster = _initialize_cluster(filename)
+		player_location = star_cluster.find_random_location()
 	return star_cluster, player_location
 
 
@@ -89,7 +89,7 @@ def _initialize_cluster(filename):
 	return star_cluster
 
 
-def main_operations_menu():
+def select_action():
 	action = input("Select an action:\n"
 					"\t1. Omni-Directional Scan: search the area for stars and nebulae\n"
 					"\t2. Focal Scan: search a star system for details\n"
@@ -103,6 +103,43 @@ def main_operations_menu():
 	return action
 
 
+def execute_action(action, player_location, star_cluster):
+	if action == "1": # area scan
+		print("\nConducting omni-directional scan...")
+		scan = star_cluster.local_scan_for(player_location)
+		print("The scan of {}ly radius found {} stars and {} nebulas.\n\n"
+			"Star Locations:\n{}".format(scan[2], len(scan[0]), len(scan[1]), scan[0]))
+		if scan[1]:
+			print("\nNebula Locations:\n{}".format(scan[1]))
+	elif action == "2": # focal scan
+		coordinates = input("\nProvide coordinates for Focal Scan:\n")
+		scan = star_cluster.local_scan_for(player_location)
+		while coordinates not in (scan[0] + scan[1]): # not in scanned stars or nebulae
+			coordinates = input("Invalid coordinates. Choose again:\n")
+		if coordinates in scan[1]: # is a nebula
+			print("Focal Scan found a nebula at those coordinates.")
+		else: # is a star
+			star_cluster.print_system_stats(coordinates, player_location)
+	elif action == "3": # explode system
+		coordinates = input("\nProvide coordinates to attack:\n")
+		scan = star_cluster.local_scan_for(player_location, "stars")
+		while coordinates not in scan:
+			coordinates = input("Invalid coordinates. Choose again:\n")
+		star_cluster.explode_star(coordinates)
+	elif action == "4": # recreate star system
+		coordinates = input("\nProvide coordinates of a nebula:\n")
+		scan = star_cluster.local_scan_for(player_location, "nebulae")
+		while coordinates not in scan:
+			coordinates = input("Invalid coordinates. Choose again:\n")
+		star_cluster.recreate_star(coordinates)
+	elif action == "5": # warp
+		coordinates = input("\nProvide coordinates for warp drive:\n")
+		scan = star_cluster.local_scan_for(player_location)
+		while coordinates not in (scan[0] + scan[1]): # not in scanned stars or nebulae
+			coordinates = input("Invalid coordinates. Choose again:\n")
+		return coordinates
+
+
 def save_game(player_location, filename):
 	"""Serialize and save game data to file"""
 	save_data = {"location": player_location}
@@ -114,6 +151,7 @@ def save_game(player_location, filename):
 if __name__ == "__main__":
 
 	# ==== Handles Exiting By Ctrl-C ====
+
 	def exit_gracefully(signal, frame):
 		"""Attempt to save game data before exit, if user presses Ctrl-C"""
 		try: # exiting with game data
@@ -126,56 +164,19 @@ if __name__ == "__main__":
 	signal.signal(signal.SIGINT, exit_gracefully)
 
 	# ==== Begin Game ====
+
 	star_cluster, player_location = game_start_menu()
 	star_cluster.print_cluster_stats()
 
-	if not player_location:
-		player_location = star_cluster.find_random_location()
-	distance_to_origin = star_cluster.distance_to(player_location, '(0, 0, 0)')
-	print("You find yourself in the star system at {}.\n"
-		"You are {}ly from the center of your star cluster.".format(player_location, distance_to_origin))
-
 	# main game loop
 	while True:
-		print("Current System:", player_location)
-		action = main_operations_menu()
-		if action == "1": # area scan
-			print("\nConducting omni-directional scan...")
-			scan = star_cluster.local_scan_for(player_location)
-			print("The scan of {}ly radius found {} stars and {} nebulas.\n\n"
-				"Star Locations:\n{}".format(scan[2], len(scan[0]), len(scan[1]), scan[0]))
-			if scan[1]:
-				print("\nNebula Locations:\n{}".format(scan[1]))
-		elif action == "2": # focal scan
-			coordinates = input("\nProvide coordinates for Focal Scan:\n")
-			scan = star_cluster.local_scan_for(player_location)
-			while coordinates not in (scan[0] + scan[1]): # not in scanned stars or nebulae
-				coordinates = input("Invalid coordinates. Choose again:\n")
-			if coordinates in scan[1]: # is a nebula
-				print("Focal Scan found a nebula at those coordinates.")
-			else: # is a star
-				star_cluster.print_system_stats(coordinates, player_location)
-		elif action == "3": # explode system
-			coordinates = input("\nProvide coordinates to attack:\n")
-			scan = star_cluster.local_scan_for(player_location, "stars")
-			while coordinates not in scan:
-				coordinates = input("Invalid coordinates. Choose again:\n")
-			star_cluster.explode_star(coordinates)
-		elif action == "4": # recreate star system
-			coordinates = input("\nProvide coordinates of a nebula:\n")
-			scan = star_cluster.local_scan_for(player_location, "nebulae")
-			while coordinates not in scan:
-				coordinates = input("Invalid coordinates. Choose again:\n")
-			star_cluster.recreate_star(coordinates)
-		elif action == "5": # warp
-			coordinates = input("\nProvide coordinates for warp drive:\n")
-			scan = star_cluster.local_scan_for(player_location)
-			while coordinates not in (scan[0] + scan[1]): # not in scanned stars or nebulae
-				coordinates = input("Invalid coordinates. Choose again:\n")
-			player_location = coordinates
-		else: # exit
+		distance_to_origin = star_cluster.distance_to(player_location, '(0, 0, 0)')
+		print("Current System: " + player_location + "\nDistance From Cluster Core: " + str(distance_to_origin) + "ly")
+		action = select_action()
+		if action == "6":
 			save_game(player_location, star_cluster.filename)
 			break
-
-
-	print("\nThank you - come again!")
+		else:
+			new_player_location = execute_action(action, player_location, star_cluster)
+			if new_player_location: # is None unless player chose to warp
+				player_location = new_player_location
