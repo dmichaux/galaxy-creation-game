@@ -146,9 +146,15 @@ if __name__ == "__main__":
 				"Star Locations:\n{}".format(scan[0], len(scan[1]), len(scan[2]), scan[1]))
 			if scan[2]:
 				print("\nNebula Locations:\n{}".format(scan[2]))
-		elif action == "2": # Focal scan
+		elif action == "2": # focal scan
 			coordinates = input("\nProvide coordinates for Focal Scan:\n")
-			star_cluster.print_system_stats(coordinates, player_location)
+			scan = star_cluster.local_scan(player_location)
+			while coordinates not in (scan[1] + scan[2]): # not in scanned stars or nebulae
+				coordinates = input("Invalid coordinates. Choose again:\n")
+			if coordinates in scan[2]: # is a nebula
+				print("Focal Scan found a nebula at those coordinates.")
+			else: # is a star
+				star_cluster.print_system_stats(coordinates, player_location)
 		elif action == "3": # explode system
 			coordinates = input("\nProvide coordinates to attack:\n")
 			star_cluster.explode_star(coordinates)
