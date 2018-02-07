@@ -121,16 +121,24 @@ def execute_action(action, player_location, star_cluster):
 		else: # is a star
 			star_cluster.print_system_stats(coordinates, player_location)
 	elif action == "3": # explode system
-		coordinates = input("\nProvide coordinates to attack:\n")
+		coordinates = input("\nProvide coordinates to attack [enter 'quit' to cancel]:\n")
 		scan = star_cluster.local_scan_for(player_location, "stars")
 		while coordinates not in scan:
-			coordinates = input("Invalid coordinates. Choose again:\n")
+			if coordinates.lower() == "quit":
+				print("Action Aborted")
+				return None
+			else:
+				coordinates = input("Invalid coordinates. Choose again:\n")
 		star_cluster.explode_star(coordinates)
 	elif action == "4": # recreate star system
-		coordinates = input("\nProvide coordinates of a nebula:\n")
+		coordinates = input("\nProvide coordinates of a nebula [enter 'quit' to cancel]:\n")
 		scan = star_cluster.local_scan_for(player_location, "nebulae")
 		while coordinates not in scan:
-			coordinates = input("Invalid coordinates. Choose again:\n")
+			if coordinates.lower() == "quit":
+				print("Action Aborted")
+				return None
+			else:
+				coordinates = input("Invalid coordinates. Choose again:\n")
 		star_cluster.recreate_star(coordinates)
 	elif action == "5": # warp
 		coordinates = input("\nProvide coordinates for warp drive:\n")
