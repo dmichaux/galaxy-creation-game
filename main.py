@@ -157,12 +157,21 @@ if __name__ == "__main__":
 				star_cluster.print_system_stats(coordinates, player_location)
 		elif action == "3": # explode system
 			coordinates = input("\nProvide coordinates to attack:\n")
+			scan = star_cluster.local_scan(player_location)
+			while coordinates not in scan[1]: # not in scanned stars
+				coordinates = input("Invalid coordinates. Choose again:\n")
 			star_cluster.explode_star(coordinates)
 		elif action == "4": # recreate star system
 			coordinates = input("\nProvide coordinates of a nebula:\n")
+			scan = star_cluster.local_scan(player_location)
+			while coordinates not in scan[2]: # not in scanned nebulae
+				coordinates = input("Invalid coordinates. Choose again:\n")
 			star_cluster.recreate_star(coordinates)
 		elif action == "5": # warp
 			coordinates = input("\nProvide coordinates for warp drive:\n")
+			scan = star_cluster.local_scan(player_location)
+			while coordinates not in (scan[1] + scan[2]): # not in scanned stars or nebulae
+				coordinates = input("Invalid coordinates. Choose again:\n")
 			player_location = coordinates
 		else: # exit
 			save_game(player_location, star_cluster.filename)
