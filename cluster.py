@@ -110,25 +110,35 @@ class Cluster():
 		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 		return round(distance, 2)
 
-	def local_scan(self, current_location, search_radius=1000):
-		"""Query database for stars and nebulas within search radius of current location."""
+	def local_scan_for(self, current_location, search_for="All", search_radius=1000):
+		"""Query database for stars and/or nebulae within search radius of current location."""
 		# In larger query results fetchone() in a loop would save memory. 
 		# Here, fetchall() profiles as faster while still using minimal memory.
-		# Scan for nearby stars:
-		stars_within_range = []
-		cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'False'")
-		stars = cursor.fetchall()
-		for location, in stars:
-			if self.distance_to(current_location, location) <= search_radius:
-				stars_within_range.append(location)
-		# Scan for nearby nebulas:
-		nebulas_within_range = []
-		cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'True'")
-		nebulas = cursor.fetchall()
-		for location, in nebulas:
-			if self.distance_to(current_location, location) <= search_radius:
-				nebulas_within_range.append(location)
-		return search_radius, stars_within_range, nebulas_within_range
+		def search_for_stars(current_location, search_radius):
+			stars_within_range = []
+			cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'False'")
+			stars = cursor.fetchall()
+			for location, in stars:
+				if self.distance_to(current_location, location) <= search_radius:
+					stars_within_range.append(location)
+			return stars_within_range
+
+		def search_for_nebulae():
+			nebulas_within_range = []
+			cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'True'")
+			nebulas = cursor.fetchall()
+			for location, in nebulas:
+				if self.distance_to(current_location, location) <= search_radius:
+					nebulas_within_range.append(location)
+			return nebulas_within_range
+
+		if search_for == "Stars":
+			return search_for_stars(current_location, search_radius), search_radius
+		elif search_for == "Nebulae":
+			return search_for_nebulae(current_location, search_radius), search_radius
+		elif search_for == "All":
+			return search_for_stars(current_location, search_radius), search_for_nebulae(current_location, search_radius), search_radius
+
 
 
 	def explode_star(self, coordinates):
