@@ -18,9 +18,8 @@ class Cluster():
 
 
 	def __del__(self):
-		"""Confirm closure of database connection."""
+		"""Close database connection before program finishes."""
 		self.db_conn.close()
-		print("\n**Closing database connection**")
 
 
 	def populate_celestials(self):
