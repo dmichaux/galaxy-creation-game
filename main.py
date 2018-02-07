@@ -141,36 +141,36 @@ if __name__ == "__main__":
 		action = main_operations_menu()
 		if action == "1": # area scan
 			print("\nConducting omni-directional scan...")
-			scan = star_cluster.local_scan(player_location)
+			scan = star_cluster.local_scan_for(player_location)
 			print("The scan of {}ly radius found {} stars and {} nebulas.\n\n"
-				"Star Locations:\n{}".format(scan[0], len(scan[1]), len(scan[2]), scan[1]))
-			if scan[2]:
-				print("\nNebula Locations:\n{}".format(scan[2]))
+				"Star Locations:\n{}".format(scan[2], len(scan[0]), len(scan[1]), scan[0]))
+			if scan[1]:
+				print("\nNebula Locations:\n{}".format(scan[1]))
 		elif action == "2": # focal scan
 			coordinates = input("\nProvide coordinates for Focal Scan:\n")
-			scan = star_cluster.local_scan(player_location)
-			while coordinates not in (scan[1] + scan[2]): # not in scanned stars or nebulae
+			scan = star_cluster.local_scan_for(player_location)
+			while coordinates not in (scan[0] + scan[1]): # not in scanned stars or nebulae
 				coordinates = input("Invalid coordinates. Choose again:\n")
-			if coordinates in scan[2]: # is a nebula
+			if coordinates in scan[1]: # is a nebula
 				print("Focal Scan found a nebula at those coordinates.")
 			else: # is a star
 				star_cluster.print_system_stats(coordinates, player_location)
 		elif action == "3": # explode system
 			coordinates = input("\nProvide coordinates to attack:\n")
-			scan = star_cluster.local_scan(player_location)
-			while coordinates not in scan[1]: # not in scanned stars
+			scan = star_cluster.local_scan_for(player_location, "stars")
+			while coordinates not in scan:
 				coordinates = input("Invalid coordinates. Choose again:\n")
 			star_cluster.explode_star(coordinates)
 		elif action == "4": # recreate star system
 			coordinates = input("\nProvide coordinates of a nebula:\n")
-			scan = star_cluster.local_scan(player_location)
-			while coordinates not in scan[2]: # not in scanned nebulae
+			scan = star_cluster.local_scan_for(player_location, "nebulae")
+			while coordinates not in scan:
 				coordinates = input("Invalid coordinates. Choose again:\n")
 			star_cluster.recreate_star(coordinates)
 		elif action == "5": # warp
 			coordinates = input("\nProvide coordinates for warp drive:\n")
-			scan = star_cluster.local_scan(player_location)
-			while coordinates not in (scan[1] + scan[2]): # not in scanned stars or nebulae
+			scan = star_cluster.local_scan_for(player_location)
+			while coordinates not in (scan[0] + scan[1]): # not in scanned stars or nebulae
 				coordinates = input("Invalid coordinates. Choose again:\n")
 			player_location = coordinates
 		else: # exit

@@ -110,10 +110,12 @@ class Cluster():
 		distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 		return round(distance, 2)
 
-	def local_scan_for(self, current_location, search_for="All", search_radius=1000):
+
+	def local_scan_for(self, current_location, search_for="all", search_radius=1000):
 		"""Query database for stars and/or nebulae within search radius of current location."""
 		# In larger query results fetchone() in a loop would save memory. 
 		# Here, fetchall() profiles as faster while still using minimal memory.
+
 		def search_for_stars(current_location, search_radius):
 			stars_within_range = []
 			cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'False'")
@@ -123,7 +125,7 @@ class Cluster():
 					stars_within_range.append(location)
 			return stars_within_range
 
-		def search_for_nebulae():
+		def search_for_nebulae(current_location, search_radius):
 			nebulas_within_range = []
 			cursor = self.db_conn.execute("SELECT location FROM stars WHERE nebula = 'True'")
 			nebulas = cursor.fetchall()
@@ -132,11 +134,11 @@ class Cluster():
 					nebulas_within_range.append(location)
 			return nebulas_within_range
 
-		if search_for == "Stars":
-			return search_for_stars(current_location, search_radius), search_radius
-		elif search_for == "Nebulae":
-			return search_for_nebulae(current_location, search_radius), search_radius
-		elif search_for == "All":
+		if search_for == "stars":
+			return search_for_stars(current_location, search_radius)
+		elif search_for == "nebulae":
+			return search_for_nebulae(current_location, search_radius)
+		elif search_for == "all":
 			return search_for_stars(current_location, search_radius), search_for_nebulae(current_location, search_radius), search_radius
 
 
