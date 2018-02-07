@@ -1,6 +1,7 @@
 import sqlite3
 import random
 import math
+import sys
 
 
 class Cluster():
@@ -34,7 +35,10 @@ class Cluster():
 			location, star_locations = self._generate_location(map_size, star_locations)
 			if i % (star_count // 20) == 0:
 				percent_created += 5
-				print("{}% created".format(percent_created))
+				sys.stdout.write("\r{}% created".format(percent_created))
+				sys.stdout.flush()
+				if percent_created == 100:
+					print()
 			self.db_conn.execute("INSERT INTO stars (age, mass, location, nebula) "
 								"VALUES (?, ?, ?, ?)", (age, mass, location, 'False'))
 			local_planet_num = random.randint(0, 9)
