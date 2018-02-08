@@ -97,9 +97,9 @@ class Cluster():
 		with closing(self.db_conn.cursor()) as cursor:
 			cursor.execute("SELECT COUNT(id) FROM planets WHERE habitable = 'True'")
 			habitable_num, = cursor.fetchone()
-		print("\nCluster Stats:\n"
-			"Stars: {}\n"
-			"Planets: {} [{} in the Habitable Zone]".format(star_num, planet_num, habitable_num))
+		print(f"\nCluster Stats:\n"
+			f"Stars: {star_num}\n"
+			f"Planets: {planet_num} [{habitable_num} in the Habitable Zone]")
 
 
 	def find_random_location(self):
@@ -178,7 +178,7 @@ class Cluster():
 		local_planet_num = random.randint(0, 9)
 		if local_planet_num > 0:
 			self._populate_planets(local_planet_num, coordinates)
-		print("Star created. It has {} planets.".format(local_planet_num))
+		print(f"Star created. It has {local_planet_num} planets.")
 		self.db_conn.commit()
 
 
@@ -192,10 +192,10 @@ class Cluster():
 			cursor.execute("SELECT COUNT(id) FROM planets "
 							"WHERE home_star = ?", (coordinates,))
 			planet_num, = cursor.fetchone()
-		print("\nSelected system details:"
-				"\nStar Age: {} billion years"
-				"\nStar Mass: {} Solar Masses"
-				"\nOrbiting Planets: {}".format(star_age, star_mass, planet_num))
+		print(f"\nSelected system details:"
+				f"\nStar Age: {star_age} billion years"
+				f"\nStar Mass: {star_mass} Solar Masses"
+				f"\nOrbiting Planets: {planet_num}")
 		# If user searches current location, print more detailed planetary info
 		if coordinates == player_location:
 			with closing(self.db_conn.cursor()) as cursor:
@@ -215,4 +215,5 @@ class Cluster():
 					else:
 						habitable = 'No'
 					planet_counter += 1
-					print("{}: {}au | {} Earth Masses | {} | {}".format(planet_counter, distance, mass, composition, habitable))
+					print(f"{planet_counter}: {distance}au | {mass} Earth Masses "
+						f"| {composition} | {habitable}")

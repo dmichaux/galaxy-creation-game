@@ -110,10 +110,9 @@ def execute_action(action, player_location, star_cluster):
 	if action == "1": # area scan
 		print("\nConducting omni-directional scan...")
 		scan = star_cluster.local_scan_for(player_location)
-		print("The scan of {}ly radius found {} stars and {} nebulas.\n\n"
-			"Star Locations:\n{}".format(scan[2], len(scan[0]), len(scan[1]), scan[0]))
+		print(f"The scan of {scan[2]}ly radius found {len(scan[0])} stars and {len(scan[1])} nebulas.\n\nStar Locations:\n{scan[0]}")
 		if scan[1]:
-			print("\nNebula Locations:\n{}".format(scan[1]))
+			print(f"\nNebula Locations:\n{scan[1]}")
 	elif action == "2": # focal scan
 		coordinates = input("\nProvide coordinates for Focal Scan:\n")
 		scan = star_cluster.local_scan_for(player_location)
@@ -182,7 +181,8 @@ if __name__ == "__main__":
 	# main game loop
 	while True:
 		distance_to_origin = star_cluster.distance_to(player_location, '(0, 0, 0)')
-		print("\nCurrent System: " + player_location + "\nDistance From Cluster Core: " + str(distance_to_origin) + "ly")
+		print(f"\nCurrent System: {player_location}\n"
+			f"Distance From Cluster Core: {str(distance_to_origin)}ly")
 		action = select_action()
 		if action == "6":
 			save_game(player_location, star_cluster.filename)
