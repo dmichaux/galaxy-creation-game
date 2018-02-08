@@ -5,7 +5,6 @@
 # TODO change habitable 'True/False' to 'Yes/No' in planets table?
 # TODO **IF ABOVE** remove "if eval(habitable):" in system_stats
 
-# TODO explore "with" statement for db/cursor management
 # TODO add sleep() time for better flow
 
 import os
@@ -26,9 +25,7 @@ def game_start_menu():
 		while new_or_load not in ["1", "2"]: #user did not enter "1" or "2"
 			new_or_load = input('Invalid selection. Please enter "1" or "2":\n') 
 		if new_or_load == "1": # new game
-			filename = _get_valid_filename(files)
-			star_cluster = _initialize_cluster(filename)
-			player_location = star_cluster.find_random_location()
+			star_cluster, player_location = create_new_game()
 		else: # load game
 			print("Choose a cluster to warp to:")
 			for file in files:
@@ -45,9 +42,14 @@ def game_start_menu():
 	else: # No previous games exists. Start new game.
 		if not os.path.isdir("save_files"):
 			os.mkdir("save_files")
-		filename = _get_valid_filename()
-		star_cluster = _initialize_cluster(filename)
-		player_location = star_cluster.find_random_location()
+		star_cluster, player_location = create_new_game()
+	return star_cluster, player_location
+
+
+def create_new_game():
+	filename = _get_valid_filename()
+	star_cluster = _initialize_cluster(filename)
+	player_location = star_cluster.find_random_location()
 	return star_cluster, player_location
 
 
