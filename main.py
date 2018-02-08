@@ -104,6 +104,7 @@ def select_action():
 
 
 def execute_action(action, player_location, star_cluster):
+	"""Execute player-selected action. Return None unless player chose to warp (#5)."""
 	if action == "1": # area scan
 		print("\nConducting omni-directional scan...")
 		scan = star_cluster.local_scan_for(player_location)
@@ -179,7 +180,7 @@ if __name__ == "__main__":
 	# main game loop
 	while True:
 		distance_to_origin = star_cluster.distance_to(player_location, '(0, 0, 0)')
-		print("Current System: " + player_location + "\nDistance From Cluster Core: " + str(distance_to_origin) + "ly")
+		print("\nCurrent System: " + player_location + "\nDistance From Cluster Core: " + str(distance_to_origin) + "ly")
 		action = select_action()
 		if action == "6":
 			save_game(player_location, star_cluster.filename)
