@@ -35,7 +35,7 @@ def game_start_menu():
 			while not _test_filename_existence(filename, files): # must choose a valid save file
 				filename = input("That cluster does not exist. Choose again:\n")
 			save_data = {}
-			with open("save_files/" + filename + ".txt", "r") as json_file:
+			with open(os.path.normpath("save_files/" + filename + ".txt"), "r") as json_file:
 				save_data = json.load(json_file)
 			player_location = save_data["location"]
 			star_cluster = cluster.Cluster(filename)
@@ -153,7 +153,7 @@ def execute_action(action, player_location, star_cluster):
 def save_game(player_location, filename):
 	"""Serialize and save game data to file"""
 	save_data = {"location": player_location}
-	with open("save_files/" + filename + ".txt", "w") as outfile:
+	with open(os.path.normpath("save_files/" + filename + ".txt"), "w") as outfile:
 		json.dump(save_data, outfile)
 	print("\nYour cluster and player data has been saved.")
 
