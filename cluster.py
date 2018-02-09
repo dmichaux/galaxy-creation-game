@@ -47,7 +47,7 @@ class Cluster():
 			local_planet_num = random.randint(0, 9)
 			if local_planet_num > 0:
 				self._populate_planets(local_planet_num, location)
-			self.db_conn.commit()
+		self.db_conn.commit()
 
 
 	def _populate_planets(self, planet_num, home_star_location):
